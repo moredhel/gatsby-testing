@@ -1,6 +1,12 @@
 # TODO make this more dynamic
-build: mkdir
+build: gatsby mkdir godeps
 	go build -o funcs/hello ./lambdas/hello.go
+
+gatsby:
+	gatsby build
+
+godeps:
+	go mod download
 
 mkdir:
 	mkdir -p funcs
