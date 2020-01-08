@@ -16,8 +16,6 @@ const (
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	fmt.Println("Request Received")
-
 	return getTargetNetIncomes(), nil
 }
 
