@@ -5,6 +5,7 @@ import (
 	"os"
 	"log"
 	"net/http"
+	"io/ioutil"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -31,20 +32,29 @@ func callAirTable(table string, view string) (*http.Response, error) {
 	return client.Do(req)
 }
 
+func errorResponse() *events.APIGatewayProxyResponse {
+	return &events.APIGatewayProxyResponse{
+		StatusCode: 400,
+		Body: "{}",
+	}
+}
 func getTargetNetIncomes() *events.APIGatewayProxyResponse {
 	table := "Income"
 	view := "Grid%20view"
-	_, err := callAirTable(table, view)
+	resp, err := callAirTable(table, view)
 	if err != nil {
-		return &events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body: "{}",
-		}
+		return errorResponse()
 	}
 
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return errorResponse()
+	}
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body: "{\"status\": true}",
+		Body: string(body),
 	}
 }
 
