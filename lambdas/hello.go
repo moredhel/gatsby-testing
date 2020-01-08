@@ -7,20 +7,10 @@ import (
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	lc, ok := lambdacontext.FromContext(ctx)
-	if !ok {
-		return &events.APIGatewayProxyResponse{
-			StatusCode: 503,
-			Body:       "Something went wrong :(",
-		}, nil
-	}
-
-	cc := lc.ClientContext
-
 	fmt.Printf("%+v\n", request.QueryStringParameters)
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       "Hello, " + cc.Client.AppTitle,
+		Body:       fmt.Sprintf("%+v", request.Body),
 	}, nil
 }
 
