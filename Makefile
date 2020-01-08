@@ -6,6 +6,7 @@ gatsby:
 	gatsby build
 
 godeps:
+	go mod graph
 	go mod download
 
 mkdir:
