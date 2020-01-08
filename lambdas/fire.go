@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	templateUrl = "https://api.airtable.com/v0/appL2X8bMcfRY4v68/%s?view=%s"
+	templateUrl = "https://api.airtable.com/v0/%s/%s?view=%s"
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	return getTargetNetIncomes(), nil
 }
 
-func callAirTable(table string, view string) (*http.Response, error) {
+func callAirTable(base string, table string, view string) (*http.Response, error) {
 	key := os.Getenv("AIRTABLE_KEY")
-	url := fmt.Sprintf(templateUrl, table, view)
+	url := fmt.Sprintf(templateUrl, base, table, view)
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
@@ -40,7 +40,8 @@ func errorResponse(err error) *events.APIGatewayProxyResponse {
 func getTargetNetIncomes() *events.APIGatewayProxyResponse {
 	table := "Income"
 	view := "Grid%20view"
-	resp, err := callAirTable(table, view)
+	base := os.Getenv("AIRTABLE_BASE")
+	resp, err := callAirTable(base, table, view)
 	if err != nil {
 		return errorResponse(err)
 	}
