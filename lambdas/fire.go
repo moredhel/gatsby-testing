@@ -32,7 +32,8 @@ func callAirTable(table string, view string) (*http.Response, error) {
 	return client.Do(req)
 }
 
-func errorResponse() *events.APIGatewayProxyResponse {
+func errorResponse(err error) *events.APIGatewayProxyResponse {
+	log.Println(err)
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 400,
 		Body: "{}",
@@ -43,14 +44,14 @@ func getTargetNetIncomes() *events.APIGatewayProxyResponse {
 	view := "Grid%20view"
 	resp, err := callAirTable(table, view)
 	if err != nil {
-		return errorResponse()
+		return errorResponse(err)
 	}
 
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return errorResponse()
+		return errorResponse(err)
 	}
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
