@@ -1,3 +1,4 @@
+var proxy = require("http-proxy-middleware")
 module.exports = {
   siteMetadata: {
     title: `Gatsby Default Starter`,
@@ -31,4 +32,14 @@ module.exports = {
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,
   ],
+  developMiddleware: app => {
+    app.use(
+      "/.netlify/functions/",
+      proxy({
+        target: "https://n.snusnu.me",
+	changeOrigin: true,
+	'209.250.254.169:8000': 'https://n.snusnu.me/', 
+      })
+    )
+  },
 }
