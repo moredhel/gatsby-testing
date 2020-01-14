@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"io/ioutil"
+	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -16,7 +17,21 @@ const (
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	return getTargetNetIncomes(), nil
+	resp := Response{
+		TargetIncome: getTargetIncomes(),
+		Principal: getPrincipal(),
+	}
+
+	data, _  := json.Marshal(resp)
+	return &events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body: string(data),
+	}, nil
+}
+
+type Response struct {
+	TargetIncome string
+	Principal string
 }
 
 func callAirTable(base string, table string, view string) (*http.Response, error) {
@@ -30,14 +45,11 @@ func callAirTable(base string, table string, view string) (*http.Response, error
 	return client.Do(req)
 }
 
-func errorResponse(err error) *events.APIGatewayProxyResponse {
+func errorResponse(err error) string {
 	log.Println(err)
-	return &events.APIGatewayProxyResponse{
-		StatusCode: 400,
-		Body: "{}",
-	}
+	return "{}"
 }
-func getTargetNetIncomes() *events.APIGatewayProxyResponse {
+func getTargetIncomes() string {
 	table := "Income"
 	view := "Grid%20view"
 	base := os.Getenv("AIRTABLE_BASE")
@@ -52,12 +64,26 @@ func getTargetNetIncomes() *events.APIGatewayProxyResponse {
 	if err != nil {
 		return errorResponse(err)
 	}
-	return &events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Body: string(body),
-	}
+	return string(body)
 }
 
+func getPrincipal() string {
+	table := "Monthly%20NW"
+	view := "Grid%20view"
+	base := os.Getenv("AIRTABLE_BASE")
+	resp, err := callAirTable(base, table, view)
+	if err != nil {
+		return errorResponse(err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return errorResponse(err)
+	}
+	return string(body)
+}
 func main() {
 	key := os.Getenv("AIRTABLE_KEY")
 	if key == "" {
