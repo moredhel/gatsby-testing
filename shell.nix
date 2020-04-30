@@ -4,6 +4,6 @@ with import <nixpkgs> {};
 stdenv.mkDerivation {
   name = "env";
   buildInputs = [
-    go
+    nodejs-12_x
   ];
 }
